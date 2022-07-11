@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+import { SocialMediaDocument } from "../@types";
 const schema = mongoose.Schema;
 
 const socialMediaSchema = new schema({
@@ -21,5 +22,5 @@ const socialMediaSchema = new schema({
     }
 });
 
-const SocialMedia = mongoose.model("SocialMedia", socialMediaSchema);
-module.exports = SocialMedia;
+const SocialMedia = mongoose.model<SocialMediaDocument>("SocialMedia", socialMediaSchema);
+export default  SocialMedia;

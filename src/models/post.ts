@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+import { PostDocument } from "../@types";
 const schema = mongoose.Schema;
 
 const postSchema = new schema({
@@ -17,5 +18,5 @@ const postSchema = new schema({
     },
 }) 
 
-const Post = mongoose.model("Post", postSchema);
-module.exports = Post;
+const Post = mongoose.model<PostDocument>("Post", postSchema);
+export default  Post;

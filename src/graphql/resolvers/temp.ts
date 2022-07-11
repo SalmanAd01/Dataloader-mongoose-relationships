@@ -1,38 +1,39 @@
-const User = require("../../models/user");
-const SocialMedia = require("../../models/socialmedia");
-const Post = require("../../models/post");
-const Dataloader = require("dataloader");
-const DataLoader = require("dataloader");
+import User from "../../models/user";
+import SocialMedia from "../../models/socialmedia";
+import Post from "../../models/post";
+import Dataloader from "dataloader";
+import DataLoader from "dataloader";
+import { UserDocument } from "../../@types";
+import {Query} from "type-graphql"
+// const usersloader = new DataLoader(async (userIds:UserDocument["_id"][]) => {
+//     console.log("userloader");
+//     const users = await User.find({ _id: { $in: userIds } });
+//     userIds.forEach((userId, index) => {
+//         const user = users.find((user) => {
+//             return user._id.toString() === userId.toString();
+//         });
+//         if (user) {
+//             userIds[index] = user;
+//         }
+//     });
+//     return userIds;
+// });
 
-const usersloader = new DataLoader(async (userIds) => {
-    console.log("userloader");
-    const users = await User.find({ _id: { $in: userIds } });
-    userIds.forEach((userId, index) => {
-        const user = users.find((user) => {
-            return user._id.toString() === userId.toString();
-        });
-        if (user) {
-            userIds[index] = user;
-        }
-    });
-    return userIds;
-});
+// const postsloader = new DataLoader(async (postIds) => {
+//     console.log("postloader");
+//     return postIds.map(async (postId) => {
+//         const posts = await Post.find({ _id: { $in: postId } });
+//         return posts;
+//     });
+// });
 
-const postsloader = new DataLoader(async (postIds) => {
-    console.log("postloader");
-    return postIds.map(async (postId) => {
-        const posts = await Post.find({ _id: { $in: postId } });
-        return posts;
-    });
-});
+// const socialmediasloader = new DataLoader(async (socialmediaIds) => {
+//     console.log("socialmediasloader");
+//     const socialmedias = await SocialMedia.find({ _id: { $in: socialmediaIds } });
+//     return socialmedias;
+// });
 
-const socialmediasloader = new DataLoader(async (socialmediaIds) => {
-    console.log("socialmediasloader");
-    const socialmedias = await SocialMedia.find({ _id: { $in: socialmediaIds } });
-    return socialmedias;
-});
-
-module.exports = {
+export default{
     Query: {
         getUsers: async () => {
             try {
@@ -45,9 +46,10 @@ module.exports = {
         getSocialMedias: async () => {
             try {
                 const socialMedias = await SocialMedia.find({});
-                for (const user of socialMedias) {
-                    usersloader.prime(user.id, user);
-                }
+                // for (const user of socialMedias) {
+                //     usersloader.prime(user.id, user);
+                // }
+
                 return socialMedias;
             } catch (err) {
                 console.log(err);
@@ -63,7 +65,7 @@ module.exports = {
         },
     },
     Mutation: {
-        createUser: async (root, args) => {
+        createUser: async (_, args) => {
             try {
                 const user = new User({
                     name: args.name,
@@ -114,42 +116,42 @@ module.exports = {
     },
     Post: {
         // using dataloader
-        async creator(parent) {
-            return usersloader.load(parent.creator);
-        },
         // async creator(parent) {
-        //     console.log("parent")
-        //     return await User.findById(parent.creator);
+        //     return usersloader.load(parent.creator);
         // },
+        async creator(parent) {
+            console.log("parent")
+            return await User.findById(parent.creator);
+        },
     },
     SocialMedia: {
-        // async belongsTo(parent) {
-        //     console.log("socialmedia");
-        //     return await User.findById(parent.belongsTo);
-
-        // }
-        // using dataloader
         async belongsTo(parent) {
-            return usersloader.load(parent.belongsTo);
-        },
+            console.log("socialmedia");
+            return await User.findById(parent.belongsTo);
+
+        }
+        // using dataloader
+        // async belongsTo(parent) {
+        //     return usersloader.load(parent.belongsTo);
+        // },
     },
     User: {
         // using dataloader
-        async socialMedia(parent) {
-            if(!parent.socialMedia) return null;
-            return socialmediasloader.load(parent.socialMedia);
-        },
         // async socialMedia(parent) {
-        //     console.log("usersm");
-        //     return await SocialMedia.findById(parent.socialMedia);
+        //     if(!parent.socialMedia) return null;
+        //     return socialmediasloader.load(parent.socialMedia);
         // },
-        // using dataloader
-        async posts(parent) {
-            return postsloader.load(parent.posts);
+        async socialMedia(parent) {
+            console.log("usersm");
+            return await SocialMedia.findById(parent.socialMedia);
         },
+        // using dataloader
         // async posts(parent) {
-        //     console.log("userposts");
-        //     return await Post.find({ creator: parent._id });
-        // }
+        //     return postsloader.load(parent.posts);
+        // },
+        async posts(parent) {
+            console.log("userposts");
+            return await Post.find({ creator: parent._id });
+        }
     },
 };
